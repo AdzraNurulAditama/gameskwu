@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Snackissy platinum</title>
+    <style>
+        :root { --bg:#FFF8E1; --pink:#E91E63; --soft:#F8BBD0; --brown:#5D4037; --gold:#FFC107; }
+        body { margin:0; overflow:hidden; font-family:'Comic Sans MS',cursive,sans-serif; background:var(--bg); color:var(--brown); user-select:none; touch-action:none; -webkit-tap-highlight-color:transparent; }
+        .screen { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:var(--bg); flex-direction:column; align-items:center; overflow-y:auto; }
+        .active { display:flex !important; } .no-scroll { overflow:hidden !important; }
+        .btn { background:var(--pink); color:white; border:none; padding:12px 25px; border-radius:50px; font-weight:bold; box-shadow:0 4px #C2185B; margin:5px; position:relative; top:0; transition:all 0.1s; font-size:16px; }
+        .btn:active { top:4px; box-shadow:0 0 #C2185B; } .btn-gold { background:var(--gold); color:var(--brown); box-shadow:0 4px #FFA000; } .btn-small { padding:8px 15px; font-size:14px; }
+        
+        /* HEADER & MENU */
+        #currencyBar { position:fixed; top:10px; right:10px; z-index:90; background:rgba(255,255,255,0.9); padding:8px 15px; border-radius:30px; border:2px solid var(--gold); font-weight:bold; color:var(--gold); }
+        .menu-head { text-align:center; margin-top:50px; animation:float 3s ease-in-out infinite; } @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+        .game-card { background:white; border-radius:20px; width:85%; max-width:320px; padding:20px; margin:15px 0; text-align:center; box-shadow:0 8px 20px rgba(0,0,0,0.1); border-bottom:6px solid var(--soft); }
+
+        /* TUTORIAL ANIMATIONS */
+        .tut-anim-box { height:120px; background:#eee; border-radius:15px; margin:15px 0; position:relative; overflow:hidden; border:2px solid var(--soft); }
+        .tut-hand { font-size:40px; position:absolute; bottom:10px; left:50%; animation:swipe 1.5s infinite ease-in-out; }
+        @keyframes swipe { 0%,100%{left:30%} 50%{left:70%} }
+        .tut-tap { font-size:40px; position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); animation:tap 0.8s infinite; }
+        @keyframes tap { 0%,100%{transform:translate(-50%,-50%) scale(1)} 50%{transform:translate(-50%,-50%) scale(0.8)} }
+        .tut-fall { font-size:30px; position:absolute; left:50%; animation:fall 2s infinite linear; }
+        @keyframes fall { from{top:-30px} to{top:120px} }
+
+        /* GAME UI */
+        .hud { position:fixed; top:15px; left:15px; font-size:24px; font-weight:900; color:var(--pink); z-index:50; text-shadow:2px 2px 0 white; }
+        .exit-btn { position:fixed; top:15px; right:15px; z-index:51; width:45px; height:45px; border-radius:50%; font-size:22px; padding:0; display:flex; justify-content:center; align-items:center; background:#fff; color:var(--pink); border:3px solid var(--pink); }
+        
+        /* MODALS */
+        .overlay { position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:100; display:none; justify-content:center; align-items:center; }
+        .modal { background:var(--bg); padding:25px; border-radius:25px; width:85%; max-width:350px; text-align:center; border:4px solid var(--pink); }
+        .fortune { background:#FFF3E0; padding:15px; margin:15px 0; border-left:5px solid var(--gold); font-style:italic; text-align:left; font-size:14px; }
+
+        /* GAME ASSETS */
+        #g1p { position:absolute; bottom:110px; left:50%; font-size:70px; transform:translateX(-50%); transition:left 0.08s; }
+        .g2b { position:absolute; height:45px; background:linear-gradient(to bottom,#fff 15%,#FFD54F 15%,#FFD54F 85%,#8D6E63 85%); border-radius:6px; box-shadow:inset 0 -3px rgba(0,0,0,0.1); }
+        .g3c { aspect-ratio:1; background:var(--pink); border-radius:12px; display:flex; justify-content:center; align-items:center; font-size:45px; transition:transform 0.3s; transform-style:preserve-3d; }
+        .g3c.f { background:white; transform:rotateY(180deg); } .g3c span { opacity:0; transition:opacity 0.2s; } .g3c.f span { opacity:1; }
+    </style>
+</head>
+<body>
+
+<div id="currencyBar">💰 <span id="totalCoins">0</span></div>
+
+<div id="mainMenu" class="screen active">
+    <div class="menu-head"><h1 style="color:var(--pink); font-size:40px; margin:0; line-height:0.9;">SNACKISSY<br><span style="font-size:20px; color:var(--brown); letter-spacing:2px;">PLATINUM ARCADE</span></h1></div>
+    <div style="display:flex; flex-wrap:wrap; justify-content:center; padding-bottom:80px; width:100%;">
+        <div class="game-card"><h2>🥣 Catcher</h2><p>Tangkap bahan kue!</p><button class="btn btn-gold btn-small" onclick="app.tut('g1')">CARA MAIN</button><button class="btn btn-small" onclick="g1.init()">MAIN</button></div>
+        <div class="game-card"><h2>🏗️ Tower</h2><p>Tumpuk tinggi-tinggi.</p><button class="btn btn-gold btn-small" onclick="app.tut('g2')">CARA MAIN</button><button class="btn btn-small" onclick="g2.init()">MAIN</button></div>
+        <div class="game-card"><h2>🧩 Memory</h2><p>Uji daya ingatmu.</p><button class="btn btn-gold btn-small" onclick="app.tut('g3')">CARA MAIN</button><button class="btn btn-small" onclick="g3.init()">MAIN</button></div>
+        <button class="btn btn-gold" style="width:85%; max-width:320px; margin-top:20px; padding:15px;" onclick="app.shop()">🛒 TOKO SKIN</button>
+    </div>
+</div>
+
+<div id="shopScreen" class="screen" style="padding-top:20px;"><div style="width:90%; max-width:400px; display:flex; justify-content:space-between; align-items:center;"><button class="btn btn-small" onclick="app.menu()">⬅ MENU</button><h2 style="color:var(--pink); margin:0;">Toko Skin</h2><div style="width:70px;"></div></div><h3 style="color:var(--gold)">Koinmu: 💰<span id="shopCoins">0</span></h3><div id="shopList" style="width:100%; padding-bottom:50px;"></div></div>
+<div id="tutScreen" class="screen" style="padding-top:40px;"><h1 id="tutTitle" style="color:var(--pink)">Tutorial</h1><div id="tutAnim" class="tut-anim-box"></div><div id="tutText" style="width:85%; max-width:350px; text-align:left; background:white; padding:20px; border-radius:15px; box-shadow:0 5px 15px rgba(0,0,0,0.05); line-height:1.5;"></div><button class="btn btn-gold" style="margin-top:20px; width:80%; max-width:300px;" onclick="app.menu()">SIAP MAIN!</button></div>
+
+<div id="overlay" class="overlay">
+    <div id="modalOver" class="modal" style="display:none;"><h2 style="margin:0; color:var(--brown)">Selesai!</h2><div style="background:var(--soft); color:var(--pink); font-size:40px; font-weight:900; margin:15px 0; border-radius:15px; padding:10px;">SKOR: <span id="fScore">0</span></div><p>Dapat 💰+<span id="eCoins">0</span></p><div style="text-align:left; color:var(--pink); font-weight:bold;">🥠 Ramalan Kue:</div><div id="fortune" class="fortune">...</div><input type="text" id="iName" placeholder="Namamu" maxlength="12" style="padding:10px; width:80%; text-align:center; border:2px solid var(--gold); border-radius:10px; margin-bottom:10px;"><div style="display:flex; gap:10px;"><button class="btn btn-small" id="bSave" style="flex:1">SIMPAN</button><button class="btn btn-small" style="flex:1; background:#999;" onclick="app.menu()">MENU</button></div></div>
+    <div id="modalLB" class="modal" style="display:none;"><h2 id="lbT" style="color:var(--pink); margin-top:0;">Top Skor</h2><div id="lbL" style="text-align:left; max-height:50vh; overflow-y:auto; margin-bottom:20px;"></div><button class="btn" onclick="document.getElementById('overlay').style.display='none'" style="width:100%">TUTUP</button></div>
+</div>
+
+<div id="g1" class="screen no-scroll" style="background:linear-gradient(#4FC3F7,#E1F5FE);"><div class="hud">SKOR: <span id="g1s">0</span></div><button class="exit-btn" onclick="g1.over(true)">❌</button><div id="g1p">🥣</div><div style="position:absolute; bottom:0; width:100%; height:120px; background:#795548; border-top:12px solid #5D4037;"></div></div>
+<div id="g2" class="screen no-scroll" style="background:linear-gradient(#FFE0B2,#FFF3E0);" onmousedown="g2.tap()" ontouchstart="g2.tap()"><div class="hud">TINGGI: <span id="g2s">0</span></div><button class="exit-btn" onclick="g2.over(true)">❌</button><div id="g2a" style="position:absolute; width:100%; height:100%; bottom:0; transition:transform 0.5s cubic-bezier(0.25,1,0.5,1);"><div class="g2b" style="bottom:0; left:50%; transform:translateX(-50%); width:220px; background:var(--brown);"></div></div><div id="g2m" class="g2b" style="top:20%; left:0; width:220px; visibility:hidden;"></div><div style="position:absolute; bottom:15%; width:100%; text-align:center; opacity:0.5; font-weight:bold; pointer-events:none;">KETUK UNTUK JATUHKAN</div></div>
+<div id="g3" class="screen no-scroll" style="background:#E8EAF6; padding-top:80px;"><div class="hud" style="color:var(--brown)">MOVES: <span id="g3m">0</span></div><button class="exit-btn" style="border-color:var(--brown); color:var(--brown);" onclick="app.menu()">❌</button><div id="g3g" style="display:grid; grid-template-columns:repeat(4,1fr); gap:12px; width:90%; max-width:400px; margin:0 auto;"></div></div>
+
+<script>
+const F=["Hidup itu seperti cheesecake, kadang butuh sedikit rasa masam agar lebih segar!","Hari ini kamu semanis stroberi di atas kue. Tetap semangat!","Jangan takut gagal. Kue bantat pun masih bisa dimakan kok (kadang-kadang).","Kesabaran adalah kunci baking... dan juga kunci menghadapi hari Senin.","Rejeki hari ini akan selembut tekstur cheesecake panggang yang sempurna.","Fakta: Makan kue bisa meningkatkan mood sebesar 100% (menurut riset kami)."];
+const app={c:parseInt(localStorage.getItem('fb_c'))||100,s:localStorage.getItem('fb_s')||'🥣',o:JSON.parse(localStorage.getItem('fb_o'))||['🥣'],
+    i:[{id:'🥣',n:'Mangkok',p:0},{id:'🧺',n:'Keranjang',p:500},{id:'🥡',n:'Takeaway',p:1500},{id:'🛒',n:'Troli',p:3000},{id:'🎩',n:'Topi Sulap',p:5000},{id:'🛸',n:'UFO',p:9999}],
+    init:function(){this.upC(0)},upC:function(n){this.c+=n;localStorage.setItem('fb_c',this.c);document.getElementById('totalCoins').innerText=this.c},
+    menu:function(){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById('mainMenu').classList.add('active');document.getElementById('overlay').style.display='none';document.getElementById('currencyBar').style.display='flex'},
+    tut:function(gid){
+        document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById('tutScreen').classList.add('active');
+        let t='',c='',a='';
+        if(gid==='g1'){t='Catcher';c='<b>Gerakkan wadah</b> ke kiri/kanan untuk menangkap bahan kue (🧀🍓🥛) yang jatuh. Hati-hati! Jangan tangkap barang kotor (🪲👞) atau BOM (💣) yang bisa meledak!';a='<div class="tut-hand">👆</div><div class="tut-fall" style="left:30%">🧀</div><div class="tut-fall" style="left:70%; animation-delay:1s">🍓</div>';}
+        else if(gid==='g2'){t='Tower';c='<b>Ketuk layar</b> tepat saat potongan kue berada di tengah-tengah tumpukan. Jika kamu meleset sedikit, potongan kue berikutnya akan semakin kecil dan susah!';a='<div class="tut-tap">👆</div><div class="g2b" style="bottom:0;left:50%;transform:translateX(-50%);width:150px;"></div><div class="g2b" style="bottom:50px;left:40%;width:150px;"></div>';}
+        else{t='Memory';c='<b>Ketuk kartu</b> untuk melihat gambarnya. Tugasmu adalah menemukan pasangan kartu dengan gambar yang sama. Ingat posisinya baik-baik!';a='<div style="display:flex;justify-content:center;gap:10px;padding-top:30px;"><div class="g3c" style="width:50px;font-size:25px;">❓</div><div class="g3c f" style="width:50px;font-size:25px;"><span>🧀</span></div><div class="g3c" style="width:50px;font-size:25px;">❓</div></div><div class="tut-tap" style="top:70%">👆</div>';}
+        document.getElementById('tutTitle').innerText='Cara Main: '+t;document.getElementById('tutText').innerHTML=c;document.getElementById('tutAnim').innerHTML=a;
+    },
+    shop:function(){
+        document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById('shopScreen').classList.add('active');document.getElementById('currencyBar').style.display='none';
+        document.getElementById('shopCoins').innerText=this.c;const l=document.getElementById('shopList');l.innerHTML='';
+        this.i.forEach(i=>{let o=this.o.includes(i.id),e=this.s===i.id,c=this.c>=i.p;l.innerHTML+=`<div style="background:white;padding:15px;margin:10px auto;border-radius:15px;display:flex;align-items:center;box-shadow:0 4px 10px rgba(0,0,0,0.05);width:90%;max-width:350px;"><span style="font-size:35px">${i.id}</span><span style="flex:1;margin:0 15px;font-weight:bold;">${i.n}</span>`+(e?`<button class="btn btn-small" disabled style="background:#ccc">DIPAKAI</button>`:o?`<button class="btn btn-small" onclick="app.eq('${i.id}')">PAKAI</button>`:`<button class="btn btn-small ${c?'btn-gold':''}" ${!c?'disabled':''} onclick="app.buy('${i.id}',${i.p})">BELI ${i.p}</button>`)+`</div>`});
+    },
+    buy:function(id,p){if(this.c>=p){this.upC(-p);this.o.push(id);localStorage.setItem('fb_o',JSON.stringify(this.o));this.shop()}},eq:function(id){this.s=id;localStorage.setItem('fb_s',id);this.shop()}
+};
+const lb={d:JSON.parse(localStorage.getItem('fb_lb_P'))||{g1:[],g2:[],g3:[]},sv:function(g,n,s){this.d[g].push({n,s});this.d[g].sort((a,b)=>g==='g3'?a.s-b.s:b.s-a.s);this.d[g]=this.d[g].slice(0,10);localStorage.setItem('fb_lb_P',JSON.stringify(this.d))},sh:function(g){document.getElementById('modalOver').style.display='none';document.getElementById('modalLB').style.display='block';document.getElementById('lbT').innerText={g1:'Top Catcher',g2:'Top Tower',g3:'Top Memory'}[g];const l=document.getElementById('lbL');l.innerHTML='';this.d[g].forEach((d,i)=>l.innerHTML+=`<div style="padding:10px;border-bottom:1px solid #eee;display:flex;justify-content:space-between;font-size:18px;"><span>#${i+1} <b>${d.n}</b></span><span>${d.s}</span></div>`);if(!this.d[g].length)l.innerHTML='<p style="text-align:center">Belum ada data.</p>'}};
+function over(s,g,force){if(force){app.menu();return}document.getElementById('overlay').style.display='flex';document.getElementById('modalOver').style.display='block';document.getElementById('modalLB').style.display='none';document.getElementById('fScore').innerText=s;let e=Math.max(1,Math.floor(g==='g3'?(100-s)/2:s/5));document.getElementById('eCoins').innerText=e;app.upC(e);document.getElementById('fortune').innerText=F[Math.floor(Math.random()*F.length)];document.getElementById('bSave').onclick=()=>{lb.sv(g,document.getElementById('iName').value.trim()||'Anonim',s);lb.sh(g)}};
+const g1={s:0,t:[],init:()=>{document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById('g1').classList.add('active');document.getElementById('currencyBar').style.display='none';g1.s=0;document.getElementById('g1s').innerText='0';document.getElementById('g1p').innerText=app.s;document.querySelectorAll('.g1i').forEach(i=>i.remove());g1.t.push(setInterval(g1.lp,30),setInterval(g1.sp,800));document.getElementById('g1').onmousemove=(e)=>g1.mv(e.clientX);document.getElementById('g1').ontouchmove=(e)=>{e.preventDefault();g1.mv(e.touches[0].clientX)}},mv:(x)=>{document.getElementById('g1p').style.left=Math.min(Math.max(x,40),window.innerWidth-40)+'px'},sp:()=>{let i=document.createElement('div');i.className='g1i';i.style.position='absolute';i.style.fontSize='55px';let r=Math.random();if(r<0.6){i.innerText=['🧀','🍓','🥛'][Math.floor(Math.random()*3)];i.dataset.t='g'}else if(r<0.9){i.innerText=['🪲','👞'][Math.floor(Math.random()*2)];i.dataset.t='b'}else{i.innerText='💣';i.dataset.t='d'}i.style.left=Math.random()*(window.innerWidth-60)+'px';i.style.top='-60px';document.getElementById('g1').appendChild(i)},lp:()=>{let p=document.getElementById('g1p').getBoundingClientRect();document.querySelectorAll('.g1i').forEach(i=>{i.style.top=(parseFloat(i.style.top)+7)+'px';let r=i.getBoundingClientRect();if(r.bottom>=p.top+40&&r.right>=p.left+20&&r.left<=p.right-20&&r.top<p.bottom-40){if(i.dataset.t==='g')g1.s+=10;else if(i.dataset.t==='d'){g1.over();return}else g1.s=Math.max(0,g1.s-5);document.getElementById('g1s').innerText=g1.s;i.remove()}else if(parseFloat(i.style.top)>window.innerHeight)i.remove()})},over:(f)=>{g1.t.forEach(clearInterval);g1.t=[];over(g1.s,'g1',f)}};
+const g2={s:0,w:220,sp:5,d:1,a:false,init:()=>{document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById('g2').classList.add('active');document.getElementById('currencyBar').style.display='none';g2.s=0;g2.w=220;g2.sp=5;g2.a=true;document.getElementById('g2s').innerText='0';document.getElementById('g2a').innerHTML='<div class="g2b" style="bottom:0;left:50%;transform:translateX(-50%);width:220px;background:var(--brown);"></div>';document.getElementById('g2a').style.transform='translateY(0)';g2.spn();requestAnimationFrame(g2.lp)},spn:()=>{let m=document.getElementById('g2m');m.style.width=g2.w+'px';m.style.left='0px';m.style.visibility='visible'},lp:()=>{if(!g2.a)return;let m=document.getElementById('g2m'),l=parseFloat(m.style.left||0);if(l>window.innerWidth-g2.w)g2.d=-1;else if(l<0)g2.d=1;m.style.left=(l+g2.sp*g2.d)+'px';requestAnimationFrame(g2.lp)},tap:()=>{if(!g2.a)return;let m=document.getElementById('g2m').getBoundingClientRect(),l=document.querySelector('#g2a .g2b:last-child').getBoundingClientRect(),ov=Math.min(m.right,l.right)-Math.max(m.left,l.left);if(ov>0){g2.s++;document.getElementById('g2s').innerText=g2.s;g2.w=ov;g2.sp+=0.4;let b=document.createElement('div');b.className='g2b';b.style.width=ov+'px';b.style.left=Math.max(m.left,l.left)+'px';b.style.bottom=(document.querySelectorAll('#g2a .g2b').length*45)+'px';document.getElementById('g2a').appendChild(b);if(g2.s>3)document.getElementById('g2a').style.transform=`translateY(${(g2.s-3)*45}px)`}else g2.over()},over:(f)=>{g2.a=false;document.getElementById('g2m').style.visibility='hidden';over(g2.s,'g2',f)}};
+const g3={m:0,mt:0,f:[],lk:false,i:['🧀','🍰','🍩','🍪','🍮','🥞','🍭','🍦'],init:()=>{document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById('g3').classList.add('active');document.getElementById('currencyBar').style.display='none';g3.m=0;g3.mt=0;g3.f=[];document.getElementById('g3m').innerText='0';let g=document.getElementById('g3g');g.innerHTML='';[...g3.i,...g3.i].sort(()=>Math.random()-0.5).forEach(i=>{let c=document.createElement('div');c.className='g3c';c.innerHTML=`<span>${i}</span>`;c.onclick=()=>g3.flip(c,i);g.appendChild(c)})},flip:(c,i)=>{if(g3.lk||c.classList.contains('f'))return;c.classList.add('f');g3.f.push({c,i});if(g3.f.length===2){g3.m++;document.getElementById('g3m').innerText=g3.m;g3.lk=true;setTimeout(()=>{if(g3.f[0].i===g3.f[1].i){g3.f.forEach(o=>o.c.style.visibility='hidden');if(++g3.mt===8)over(g3.m,'g3')}else g3.f.forEach(o=>o.c.classList.remove('f'));g3.f=[];g3.lk=false},800)}}};
+app.init();
+</script>
+</body>
+</html>
